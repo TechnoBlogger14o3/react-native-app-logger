@@ -1,0 +1,26 @@
+# Node dependencies
+node_modules/
+
+# TypeScript output
+lib/
+dist/
+
+# Environment files
+.env
+
+# macOS system files
+.DS_Store
+
+# Logs
+*.log
+yarn-error.log
+
+# IDE/editor config
+.vscode/
+.idea/
+
+# npm settings
+.npmrc
+
+# OS-generated files
+Thumbs.db
