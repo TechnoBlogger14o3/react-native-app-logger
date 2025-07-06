@@ -3,11 +3,13 @@ type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'none';
 interface LoggerConfig {
   enabled: boolean;
   level: LogLevel;
+  jsonFormat?: boolean;
 }
 
 const DEFAULT_CONFIG: LoggerConfig = {
   enabled: true,
   level: 'debug',
+  jsonFormat: true,
 };
 
 const COLORS: Record<LogLevel | 'reset', string> = {
@@ -15,8 +17,8 @@ const COLORS: Record<LogLevel | 'reset', string> = {
   info: '\x1b[32m',
   warn: '\x1b[33m',
   error: '\x1b[31m',
-  none: '',            // Added to fix TypeScript error
-  reset: '\x1b[0m'
+  none: '',
+  reset: '\x1b[0m',
 };
 
 const PRIORITY: Record<LogLevel, number> = {
@@ -47,16 +49,14 @@ function stringifyError(msg: any): string {
   }
   if (typeof msg === 'object') {
     try {
-      return JSON.stringify(msg, null, 2);
+      return loggerConfig.jsonFormat
+        ? JSON.stringify(msg, null, 2)
+        : JSON.stringify(msg);
     } catch {
       return String(msg);
     }
   }
   return String(msg);
-}
-
-function getTimestamp(): string {
-  return new Date().toISOString();
 }
 
 function getCaller(): string {
@@ -71,7 +71,6 @@ function getCaller(): string {
     return `${fileName}:${lineNum}`;
   }
 
-  // Fallback: try alternate match
   const altMatch = stack[3].match(/at (.*):(\d+):\d+/);
   if (altMatch) {
     const [, filePath, lineNum] = altMatch;
@@ -87,28 +86,36 @@ function logWithColor(level: LogLevel, tag: string, chunk: string): void {
   console.log(`${caller} :==> ${tag}, ${chunk}`);
 }
 
+function handleLog(level: LogLevel, tagOrMsg: any, maybeMsg?: any): void {
+  if (!loggerConfig.enabled || !shouldLog(level)) return;
+
+  const tag = maybeMsg !== undefined ? tagOrMsg : 'Log';
+  const msg = maybeMsg !== undefined ? maybeMsg : tagOrMsg;
+  const stringified = stringifyError(msg);
+
+  chunkMessage(stringified).forEach(chunk => {
+    logWithColor(level, tag, chunk);
+  });
+}
+
 export class AppLogger {
   static configure(config: Partial<LoggerConfig>) {
     loggerConfig = { ...loggerConfig, ...config };
   }
 
-  static e(tag: string, msg: any): void {
-    if (!loggerConfig.enabled || !shouldLog('error')) return;
-    chunkMessage(stringifyError(msg)).forEach(chunk => logWithColor('error', tag, chunk));
+  static e(tagOrMsg: any, maybeMsg?: any): void {
+    handleLog('error', tagOrMsg, maybeMsg);
   }
 
-  static w(tag: string, msg: any): void {
-    if (!loggerConfig.enabled || !shouldLog('warn')) return;
-    chunkMessage(stringifyError(msg)).forEach(chunk => logWithColor('warn', tag, chunk));
+  static w(tagOrMsg: any, maybeMsg?: any): void {
+    handleLog('warn', tagOrMsg, maybeMsg);
   }
 
-  static i(tag: string, msg: any): void {
-    if (!loggerConfig.enabled || !shouldLog('info')) return;
-    chunkMessage(stringifyError(msg)).forEach(chunk => logWithColor('info', tag, chunk));
+  static i(tagOrMsg: any, maybeMsg?: any): void {
+    handleLog('info', tagOrMsg, maybeMsg);
   }
 
-  static d(tag: string, msg: any): void {
-    if (!loggerConfig.enabled || !shouldLog('debug')) return;
-    chunkMessage(stringifyError(msg)).forEach(chunk => logWithColor('debug', tag, chunk));
+  static d(tagOrMsg: any, maybeMsg?: any): void {
+    handleLog('debug', tagOrMsg, maybeMsg);
   }
 }
