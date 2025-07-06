@@ -10,12 +10,28 @@ A lightweight, configurable logging utility for React Native applications. Writt
 ## Features
 
 - Multiple log levels (`debug`, `info`, `warn`, `error`, `none`)
+- Pretty JSON output for objects
+- Auto-tagging of logs with caller file & line (e.g., LoginScreen.tsx:42)
 - Simple enable/disable toggle
 - Automatic error stack trace formatting
 - Smart log splitting (avoids 4000-character truncation)
 - TypeScript support with full type safety
 - Zero dependencies
 - Clean console output
+
+## Why Use This?
+Console logs in React Native are often:
+
+- Unstructured
+- Hard to track where they came from
+- Not useful for deep objects or long logs
+
+# This library solves that by:
+
+- Giving you structured, JSON-friendly output
+- Automatically identifying which screen/line called the logger
+- Supporting minimal setup + rich debugging out of the box
+
 
 ## Installation
 
