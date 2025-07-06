@@ -4,6 +4,7 @@
   "description": "Custom debug logger for React Native apps",
   "main": "lib/AppLogger.js",
   "types": "lib/AppLogger.d.ts",
+  "files": ["lib", "README.md"],
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build"
@@ -12,10 +13,28 @@
     "logger",
     "react-native",
     "debug",
-    "typescript"
+    "typescript",
+    "log",
+    "console",
+    "error-logger",
+    "custom-logger",
+    "rn-logger",
+    "logging"
   ],
   "author": "Aman Shekhar",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TechnoBlogger14o3/react-native-app-logger.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TechnoBlogger14o3/react-native-app-logger/issues"
+  },
+  "homepage": "https://github.com/TechnoBlogger14o3/react-native-app-logger#readme",
+  "engines": {
+    "node": ">=14",
+    "npm": ">=6"
+  },
   "devDependencies": {
     "typescript": "^5.8.3",
     "undici-types": "^7.11.0"
