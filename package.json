@@ -1,6 +1,6 @@
 {
   "name": "react-native-app-logger",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A lightweight, customizable logging utility for React Native apps with JSON formatting, log levels, caller tracing, and long message handling. Perfect for debugging in development.",
   "main": "lib/AppLogger.js",
   "types": "lib/AppLogger.d.ts",
