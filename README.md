@@ -45,7 +45,6 @@ import { AppLogger } from 'react-native-app-logger';
 
 AppLogger.configure({
   enabled: true, // Enable/disable all logging
-  level: __DEV__ ? 'debug' : 'warn', // Use your environment logic
   jsonFormat: true, // Pretty-print objects as JSON
   colorize: true, // Enable colorized JSON output (optional)
   keyColor: 'blue', // Color for JSON keys (optional)
