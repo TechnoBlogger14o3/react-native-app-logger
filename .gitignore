@@ -1,6 +1,6 @@
 # Node dependencies
 node_modules/
-
+example/
 # TypeScript output
 lib/
 dist/

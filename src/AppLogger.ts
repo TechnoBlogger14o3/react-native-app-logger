@@ -18,14 +18,6 @@ const DEFAULT_CONFIG: LoggerConfig = {
 
 let loggerConfig: LoggerConfig = { ...DEFAULT_CONFIG };
 
-function chunkMessage(msg: string): string[] {
-  const chunks = [];
-  for (let i = 0; i < msg.length; i += 4000) {
-    chunks.push(msg.substring(i, i + 4000));
-  }
-  return chunks;
-}
-
 function stringifyMessage(msg: any): string {
   if (msg instanceof Error) {
     return `${msg.name}: ${msg.message}\n${msg.stack}`;
@@ -87,9 +79,8 @@ function logFormatted(level: LogLevel, tagOrMsg: any, maybeMsg?: any): void {
   const stringified = stringifyMessage(msg);
   const caller = getCaller();
 
-  chunkMessage(stringified).forEach(chunk => {
-    console.log(`${caller} :==> ${tag}, ${chunk}`);
-  });
+  // Print the entire log in one go, no chunking
+  console.log(`${caller} :==> ${tag}, ${stringified}`);
 }
 
 function getAnsiColor(color?: string, fallback: string = '\x1b[0m'): string {
