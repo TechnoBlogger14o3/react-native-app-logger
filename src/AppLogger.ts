@@ -2,7 +2,6 @@ type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'none';
 
 interface LoggerConfig {
   enabled: boolean;
-  level: LogLevel;
   jsonFormat?: boolean;
   colorize?: boolean;
   keyColor?: string;
@@ -11,26 +10,13 @@ interface LoggerConfig {
 
 const DEFAULT_CONFIG: LoggerConfig = {
   enabled: true,
-  level: 'debug',
   jsonFormat: true,
   colorize: false,
   keyColor: '\x1b[31m',
   valueColor: '\x1b[32m',
 };
 
-const PRIORITY: Record<LogLevel, number> = {
-  none: 5,
-  error: 4,
-  warn: 3,
-  info: 2,
-  debug: 1,
-};
-
 let loggerConfig: LoggerConfig = { ...DEFAULT_CONFIG };
-
-function shouldLog(level: LogLevel): boolean {
-  return PRIORITY[level] >= PRIORITY[loggerConfig.level];
-}
 
 function chunkMessage(msg: string): string[] {
   const chunks = [];
@@ -131,29 +117,22 @@ export class AppLogger {
   }
 
   static d(tagOrMsg: any, maybeMsg?: any): void {
-    if (!loggerConfig.enabled || !shouldLog('debug')) return;
+    if (!loggerConfig.enabled) return;
     logFormatted('debug', tagOrMsg, maybeMsg);
   }
 
   static i(tagOrMsg: any, maybeMsg?: any): void {
-    if (!loggerConfig.enabled || !shouldLog('info')) return;
+    if (!loggerConfig.enabled) return;
     logFormatted('info', tagOrMsg, maybeMsg);
   }
 
   static w(tagOrMsg: any, maybeMsg?: any): void {
-    if (!loggerConfig.enabled || !shouldLog('warn')) return;
+    if (!loggerConfig.enabled) return;
     logFormatted('warn', tagOrMsg, maybeMsg);
   }
 
   static e(tagOrMsg: any, maybeMsg?: any): void {
-    if (!loggerConfig.enabled || !shouldLog('error')) return;
+    if (!loggerConfig.enabled) return;
     logFormatted('error', tagOrMsg, maybeMsg);
   }
 }
-
-AppLogger.configure({
-  colorize: true,
-  jsonFormat: true,
-  keyColor: '\x1b[34m',    // Blue keys
-  valueColor: '\x1b[35m',  // Magenta values
-});
