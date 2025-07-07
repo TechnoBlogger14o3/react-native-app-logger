@@ -4,12 +4,18 @@ interface LoggerConfig {
   enabled: boolean;
   level: LogLevel;
   jsonFormat?: boolean;
+  colorize?: boolean;
+  keyColor?: string;
+  valueColor?: string;
 }
 
 const DEFAULT_CONFIG: LoggerConfig = {
   enabled: true,
   level: 'debug',
   jsonFormat: true,
+  colorize: false,
+  keyColor: '\x1b[31m',
+  valueColor: '\x1b[32m',
 };
 
 const PRIORITY: Record<LogLevel, number> = {
@@ -42,7 +48,7 @@ function stringifyMessage(msg: any): string {
   if (typeof msg === 'object') {
     try {
       return loggerConfig.jsonFormat
-        ? JSON.stringify(msg, null, 2)
+        ? colorizeJson(msg)
         : JSON.stringify(msg);
     } catch {
       return String(msg);
@@ -52,18 +58,41 @@ function stringifyMessage(msg: any): string {
   return String(msg);
 }
 
+function colorizeJson(obj: any): string {
+  const keyColor = getAnsiColor(loggerConfig.keyColor, '\x1b[31m');
+  const valueColor = getAnsiColor(loggerConfig.valueColor, '\x1b[32m');
+  const reset = '\x1b[0m';
+  const json = JSON.stringify(obj, null, 2);
+  return json.replace(
+    /\"(.*?)\":/g,
+    `${keyColor}"$1"${reset}:`
+  ).replace(
+    /: (\".*?\"|\\d+|true|false|null)/g,
+    `: ${valueColor}$1${reset}`
+  );
+}
+
 function getCaller(): string {
   const stack = new Error().stack?.split('\n');
-  if (!stack || stack.length < 4) return 'unknown';
+  if (!stack || stack.length < 4) return '';
 
-  const match = stack[3].match(/\((.*):(\d+):\d+\)/) || stack[3].match(/at (.*):(\d+):\d+/);
+  const stackLine = stack[3];
+  // Try to extract function name, file, and line
+  const match = stackLine.match(/at (.+?) \\((.*):(\\d+):(\\d+)\\)/) || stackLine.match(/at (.*):(\\d+):(\\d+)/);
   if (match) {
-    const [, filePath, lineNum] = match;
-    const fileName = filePath.split('/').pop();
-    return `${fileName}:${lineNum}`;
+    if (match.length === 5) {
+      // With function name
+      const [, funcName, filePath, lineNum] = match;
+      const fileName = filePath.split('/').pop();
+      return `${funcName} (${fileName}:${lineNum})`;
+    } else if (match.length === 4) {
+      // Without function name
+      const [, filePath, lineNum] = match;
+      const fileName = filePath.split('/').pop();
+      return `(${fileName}:${lineNum})`;
+    }
   }
-
-  return 'unknown';
+  return '';
 }
 
 function logFormatted(level: LogLevel, tagOrMsg: any, maybeMsg?: any): void {
@@ -75,6 +104,25 @@ function logFormatted(level: LogLevel, tagOrMsg: any, maybeMsg?: any): void {
   chunkMessage(stringified).forEach(chunk => {
     console.log(`${caller} :==> ${tag}, ${chunk}`);
   });
+}
+
+function getAnsiColor(color?: string, fallback: string = '\x1b[0m'): string {
+  const colorMap: Record<string, string> = {
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+    white: '\x1b[37m',
+  };
+  if (!color) return fallback;
+  if (color.startsWith('\x1b[')) return color; // raw ANSI
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) {
+    // Optionally: console.warn('Hex colors are not supported in terminal logs.');
+    return fallback;
+  }
+  return colorMap[color.toLowerCase()] || fallback;
 }
 
 export class AppLogger {
@@ -102,3 +150,10 @@ export class AppLogger {
     logFormatted('error', tagOrMsg, maybeMsg);
   }
 }
+
+AppLogger.configure({
+  colorize: true,
+  jsonFormat: true,
+  keyColor: '\x1b[34m',    // Blue keys
+  valueColor: '\x1b[35m',  // Magenta values
+});

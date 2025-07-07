@@ -5,33 +5,26 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/types-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 
-A lightweight, configurable logging utility for React Native applications. Written in TypeScript with zero dependencies.
+---
+
+A lightweight, highly-configurable logging utility for React Native and JavaScript/TypeScript projects. Provides structured, chunked, and context-rich logs with zero dependencies.
+
+---
 
 ## Features
 
-- Multiple log levels (`debug`, `info`, `warn`, `error`, `none`)
+- Multiple log levels: `debug`, `info`, `warn`, `error`, `none`
 - Pretty JSON output for objects
-- Auto-tagging of logs with caller file & line (e.g., LoginScreen.tsx:42)
-- Simple enable/disable toggle
+- **Colorized JSON output** (opt-in, with customizable colors!)
+- Auto-tagging with caller file & line number (e.g., `LoginScreen.tsx:42`)
+- Enable/disable toggle
 - Automatic error stack trace formatting
 - Smart log splitting (avoids 4000-character truncation)
 - TypeScript support with full type safety
 - Zero dependencies
-- Clean console output
+- Clean, consistent console output
 
-## Why Use This?
-Console logs in React Native are often:
-
-- Unstructured
-- Hard to track where they came from
-- Not useful for deep objects or long logs
-
-# This library solves that by:
-
-- Giving you structured, JSON-friendly output
-- Automatically identifying which screen/line called the logger
-- Supporting minimal setup + rich debugging out of the box
-
+---
 
 ## Installation
 
@@ -41,46 +34,110 @@ npm install react-native-app-logger
 yarn add react-native-app-logger
 ```
 
+---
+
 ## Configuration
-Configure the logger in your app's entry point (typically App.tsx or index.tsx):
-```
+
+Configure the logger in your app's entry point (e.g., `App.tsx` or `index.tsx`):
+
+```typescript
 import { AppLogger } from 'react-native-app-logger';
 
 AppLogger.configure({
-  enabled: true, // Set to false to disable all logging
+  enabled: true, // Enable/disable all logging
   level: __DEV__ ? 'debug' : 'warn', // Use your environment logic
+  jsonFormat: true, // Pretty-print objects as JSON
+  colorize: true, // Enable colorized JSON output (optional)
+  keyColor: 'blue', // Color for JSON keys (optional)
+  valueColor: 'magenta', // Color for JSON values (optional)
 });
 ```
+
+---
+
+## Colorized JSON Output
+
+- **Enable colorization:**
+  ```typescript
+  AppLogger.configure({ colorize: true, jsonFormat: true });
+  ```
+- **Customize colors:**
+  ```typescript
+  AppLogger.configure({
+    colorize: true,
+    keyColor: 'yellow', // or '\x1b[34m' for blue
+    valueColor: 'cyan', // or '\x1b[35m' for magenta
+  });
+  ```
+- **Supported color names:**
+
+| Name    | Example |
+|---------|---------|
+| red     | `red`   |
+| green   | `green` |
+| yellow  | `yellow`|
+| blue    | `blue`  |
+| magenta | `magenta`|
+| cyan    | `cyan`  |
+| white   | `white` |
+
+- **Advanced:** You can also use raw ANSI codes (e.g., `\x1b[31m` for red).
+- **Note:** Hex codes like `#ebebeb` are not supported and will fall back to the default color.
+
+---
+
+## Usage Examples
+
+```typescript
+import { AppLogger } from 'react-native-app-logger';
+
+AppLogger.configure({
+  enabled: true,
+  level: 'debug',
+  jsonFormat: true,
+  colorize: true,
+  keyColor: 'blue',
+  valueColor: 'magenta',
+});
+
+const studentObject = {
+  id: 1,
+  name: 'Rahul',
+  marks: { math: 95, english: 88 },
+  passed: true,
+};
+
+AppLogger.d('Student', studentObject);
+AppLogger.e('Error', new Error('Something went wrong!'));
+```
+
+---
+
 ## Configuration Options
 
-| Option  | Type | Default | Description |
-| ------------- | ------------- |------------- | ------------- |
-| enabled  | boolean  |  true  | Enable/disable all logging |
-| level  | string  |  'debug'  | Minimum log level to display |
+| Option      | Type    | Default    | Description                                 |
+|-------------|---------|------------|---------------------------------------------|
+| enabled     | boolean | true       | Enable/disable all logging                  |
+| level       | string  | 'debug'    | Minimum log level to display                |
+| jsonFormat  | boolean | true       | Pretty-print objects as JSON                |
+| colorize    | boolean | false      | Enable colorized JSON output                |
+| keyColor    | string  | 'red'      | Color for JSON keys (name or ANSI code)     |
+| valueColor  | string  | 'green'    | Color for JSON values (name or ANSI code)   |
 
-## Usage
-```
-// Basic logging
-AppLogger.debug('Component', 'Rendering started');
-AppLogger.info('Network', 'API request sent');
-
-// Warning with context
-AppLogger.warn('Storage', 'Low disk space', { freeSpace: '150MB' });
-
-// Error handling
-AppLogger.error('Auth', new Error('Login failed'));
-
-// Long messages
-AppLogger.debug('Data', largeJsonString);
-```
+---
 
 ## Log Levels
 
+| Level  | Description                | Included When Configured As        |
+|--------|----------------------------|------------------------------------|
+| debug  | Verbose development logs   | debug                              |
+| info   | Informational messages     | info, debug                        |
+| warn   | Potential issues           | warn, info, debug                  |
+| error  | Runtime errors/stacktrace  | error, warn, info, debug           |
+| none   | Disable all logging        |                                    |
 
-| Level  | Description | Included When Configured As |
-| ------------- | ------------- | ------------- |
-| debug  | Verbose development logs  |  debug |
-| info  | Informational messages  |  info, debug |
-| warn  | Potential issues  |  warn, info, debug |
-| error  | Runtime errors with stack traces  |  error, warn, info, debug |
-| none  | Disable all logging  |   |
+---
+
+## License
+
+MIT
