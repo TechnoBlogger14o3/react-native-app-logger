@@ -139,4 +139,4 @@ AppLogger.e('Error', new Error('Something went wrong!'));
 
 ## License
 
-MIT
+MIT — see the [LICENSE](./LICENSE) file for details.
